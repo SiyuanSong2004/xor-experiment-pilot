@@ -144,6 +144,7 @@ body {
   padding: 1rem 1.25rem;
   margin-bottom: 1.6rem;
   color: #111;
+  white-space: pre-wrap;
 }
 textarea {
   width: 100%;
@@ -274,7 +275,7 @@ button:disabled { opacity: 0.4; cursor: default; }
 
       <div class="section-label">Your answer</div>
       <textarea id="trial-response"
-                placeholder="Type your answer here…"
+                placeholder="Type the processed sequence here…"
                 rows="3"></textarea>
       <p class="hint">Ctrl+Enter / Cmd+Enter to advance to the next trial.</p>
     </div>
@@ -397,7 +398,18 @@ function renderTrial() {
     `Trial ${currentIdx + 1} of ${TOTAL}`;
   document.getElementById("progress-bar").style.width =
     `${(currentIdx / TOTAL) * 100}%`;
-  document.getElementById("trial-prompt").textContent = trial.prompt;
+  const promptEl = document.getElementById("trial-prompt");
+  const seq = trial.sequence;
+  const seqIdx = trial.prompt.indexOf(seq);
+  if (seqIdx !== -1) {
+    const instruction = trial.prompt.slice(0, seqIdx).trimEnd();
+    promptEl.textContent =
+      instruction + "\n" +
+      seq + "\n\n" +
+      "Please type the processed sequence in the textbox below.";
+  } else {
+    promptEl.textContent = trial.prompt;
+  }
 
   const ta = document.getElementById("trial-response");
   ta.value = responses[currentIdx].response;
