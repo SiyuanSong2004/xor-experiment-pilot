@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Language Study — Pilot</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f2f4f7;
+  color: #222;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1rem;
+}
+
+#app { width: 100%; max-width: 680px; }
+
+/* Progress */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+.progress-text { font-size: 0.88rem; color: #666; }
+.progress-bar-wrap {
+  background: #dde1e9;
+  border-radius: 99px;
+  height: 7px;
+  margin-bottom: 1.6rem;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: #4a90e2;
+  border-radius: 99px;
+  transition: width 0.35s ease;
+}
+
+/* Card */
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem 2.2rem;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.07);
+  margin-bottom: 1.2rem;
+}
+
+/* Welcome */
+.welcome-card { text-align: center; padding: 3rem 2.5rem; }
+.welcome-card h1 { font-size: 1.9rem; margin-bottom: 1rem; }
+.welcome-card > p {
+  color: #555;
+  line-height: 1.75;
+  margin-bottom: 1.4rem;
+  max-width: 460px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Form selector */
+.form-select-wrap {
+  margin-bottom: 1.6rem;
+}
+.form-select-wrap legend {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 0.7rem;
+  display: block;
+}
+.form-options {
+  display: inline-flex;
+  gap: 0;
+  border: 2px solid #dde1e9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.form-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.4rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #444;
+  transition: background 0.15s;
+  user-select: none;
+}
+.form-options label:not(:last-child) {
+  border-right: 2px solid #dde1e9;
+}
+.form-options input[type="radio"] { accent-color: #4a90e2; }
+.form-options label:has(input:checked) {
+  background: #eaf2fc;
+  color: #2a6fba;
+  font-weight: 600;
+}
+
+/* PID input */
+.field-label { font-size: 0.85rem; color: #888; margin-bottom: 0.4rem; display: block; }
+.pid-input {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto 1.8rem;
+  padding: 0.6rem 1rem;
+  border: 2px solid #dde1e9;
+  border-radius: 8px;
+  font-size: 1rem;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.pid-input:focus { border-color: #4a90e2; }
+
+/* Error */
+.load-error {
+  color: #c0392b;
+  font-size: 0.83rem;
+  margin-top: 0.8rem;
+  min-height: 1.2em;
+}
+
+/* Trial */
+.section-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #999;
+  margin-bottom: 0.55rem;
+}
+.prompt-box {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  background: #f7f8fa;
+  border: 1px solid #e4e7ed;
+  border-radius: 9px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.6rem;
+  color: #111;
+}
+textarea {
+  width: 100%;
+  min-height: 72px;
+  border: 2px solid #dde1e9;
+  border-radius: 9px;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  color: #222;
+  background: #fff;
+}
+textarea:focus { border-color: #4a90e2; }
+.hint { font-size: 0.78rem; color: #bbb; margin-top: 0.45rem; }
+
+/* Nav */
+.nav {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Buttons */
+button {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+button:disabled { opacity: 0.4; cursor: default; }
+
+.btn-prev { background: #eaecf0; color: #444; }
+.btn-prev:not(:disabled):hover { background: #d8dce4; }
+
+.btn-next { background: #4a90e2; color: #fff; min-width: 120px; }
+.btn-next:not(:disabled):hover { background: #3578c7; }
+
+.btn-download {
+  background: #27ae60;
+  color: #fff;
+  font-size: 0.82rem;
+  padding: 0.45rem 0.95rem;
+}
+.btn-download:hover { background: #1e8a4a; }
+
+.btn-start {
+  background: #4a90e2;
+  color: #fff;
+  font-size: 1.05rem;
+  padding: 0.75rem 2.8rem;
+}
+.btn-start:hover:not(:disabled) { background: #3578c7; }
+
+/* Done */
+.done-card { text-align: center; padding: 3rem 2.5rem; }
+.done-card h1 { font-size: 1.9rem; color: #27ae60; margin-bottom: 0.9rem; }
+.done-card p { color: #555; line-height: 1.75; margin-bottom: 1.6rem; }
+.btn-done-dl {
+  background: #27ae60;
+  color: #fff;
+  font-size: 1.05rem;
+  padding: 0.75rem 2.8rem;
+}
+.btn-done-dl:hover { background: #1e8a4a; }
+
+/* Screen toggling */
+.screen { display: none; }
+.screen.active { display: block; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Welcome screen -->
+  <div id="screen-welcome" class="screen active card welcome-card">
+    <h1>Language Study</h1>
+    <p>
+      You will read a short instruction and type your answer for each trial.
+      Each form contains <strong>60 trials</strong> in total.
+    </p>
+    <p>
+      You can download your responses as a JSON file at any time during
+      the experiment.
+    </p>
+
+    <fieldset class="form-select-wrap" style="border:none;">
+      <legend>Select your assigned form</legend>
+      <div class="form-options">
+        <label>
+          <input type="radio" name="form" value="form_1" checked>
+          Form 1
+        </label>
+        <label>
+          <input type="radio" name="form" value="form_2">
+          Form 2
+        </label>
+      </div>
+    </fieldset>
+
+    <span class="field-label">Participant ID (optional)</span>
+    <input class="pid-input" type="text" id="pid-input"
+           placeholder="e.g. P01" maxlength="30">
+
+    <button class="btn-start" id="btn-start" onclick="startExperiment()">Begin</button>
+    <p class="load-error" id="load-error"></p>
+  </div>
+
+  <!-- Trial screen -->
+  <div id="screen-trial" class="screen">
+    <div class="top-bar">
+      <span class="progress-text" id="progress-label">Trial 1 of 60</span>
+      <button class="btn-download" onclick="downloadJSON()">Download responses</button>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Instruction</div>
+      <div class="prompt-box" id="trial-prompt"></div>
+
+      <div class="section-label">Your answer</div>
+      <textarea id="trial-response"
+                placeholder="Type your answer here…"
+                rows="3"></textarea>
+      <p class="hint">Ctrl+Enter / Cmd+Enter to advance to the next trial.</p>
+    </div>
+
+    <div class="nav">
+      <button class="btn-prev" id="btn-prev" onclick="prevTrial()">&larr; Previous</button>
+      <button class="btn-next" id="btn-next" onclick="nextTrial()">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- Done screen -->
+  <div id="screen-done" class="screen card done-card">
+    <h1>All done!</h1>
+    <p>Thank you for completing the study.<br>Please download your responses below.</p>
+    <button class="btn-done-dl" onclick="downloadJSON()">Download responses (JSON)</button>
+  </div>
+
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+let TRIALS       = [];
+let TOTAL        = 0;
+let responses    = [];   // parallel to TRIALS: { response, time_ms }
+let currentIdx   = 0;
+let participantId = "anonymous";
+let selectedForm  = "";
+let trialStartTime = null;
+
+// ── CSV parser (handles RFC-4180 quoted fields) ────────────────────────────────
+function parseCSV(text) {
+  let i = 0;
+
+  function parseField() {
+    if (i >= text.length) return "";
+    if (text[i] === '"') {
+      i++;
+      let val = "";
+      while (i < text.length) {
+        if (text[i] === '"') {
+          if (text[i + 1] === '"') { val += '"'; i += 2; }
+          else { i++; break; }
+        } else {
+          val += text[i++];
+        }
+      }
+      return val;
+    }
+    let val = "";
+    while (i < text.length && text[i] !== "," && text[i] !== "\n" && text[i] !== "\r") {
+      val += text[i++];
+    }
+    return val;
+  }
+
+  function parseRow() {
+    const fields = [];
+    while (i < text.length && text[i] !== "\n" && text[i] !== "\r") {
+      fields.push(parseField());
+      if (i < text.length && text[i] === ",") i++;
+    }
+    while (i < text.length && (text[i] === "\n" || text[i] === "\r")) i++;
+    return fields;
+  }
+
+  const headers = parseRow();
+  const rows = [];
+  while (i < text.length) {
+    const vals = parseRow();
+    if (vals.length === 0 || (vals.length === 1 && vals[0] === "")) continue;
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = vals[idx] !== undefined ? vals[idx] : ""; });
+    rows.push(obj);
+  }
+  return rows;
+}
+
+// ── Screens ────────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// ── Experiment flow ────────────────────────────────────────────────────────────
+async function startExperiment() {
+  const formInput = document.querySelector('input[name="form"]:checked');
+  selectedForm = formInput ? formInput.value : "form_1";
+  participantId = document.getElementById("pid-input").value.trim() || "anonymous";
+
+  const btn = document.getElementById("btn-start");
+  const errEl = document.getElementById("load-error");
+  btn.disabled = true;
+  btn.textContent = "Loading…";
+  errEl.textContent = "";
+
+  try {
+    const res = await fetch(`${selectedForm}.csv`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    TRIALS = parseCSV(text);
+    TOTAL = TRIALS.length;
+    responses = Array.from({ length: TOTAL }, () => ({ response: "", time_ms: null }));
+    currentIdx = 0;
+    showScreen("screen-trial");
+    renderTrial();
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = "Begin";
+    errEl.textContent =
+      `Could not load ${selectedForm}.csv. ` +
+      `If testing locally, serve with: python -m http.server`;
+  }
+}
+
+function renderTrial() {
+  trialStartTime = Date.now();
+  const trial = TRIALS[currentIdx];
+
+  document.getElementById("progress-label").textContent =
+    `Trial ${currentIdx + 1} of ${TOTAL}`;
+  document.getElementById("progress-bar").style.width =
+    `${(currentIdx / TOTAL) * 100}%`;
+  document.getElementById("trial-prompt").textContent = trial.prompt;
+
+  const ta = document.getElementById("trial-response");
+  ta.value = responses[currentIdx].response;
+  ta.focus();
+
+  document.getElementById("btn-prev").disabled = (currentIdx === 0);
+  document.getElementById("btn-next").textContent =
+    currentIdx === TOTAL - 1 ? "Finish \u2713" : "Next \u2192";
+}
+
+function saveCurrentResponse() {
+  const ta = document.getElementById("trial-response");
+  responses[currentIdx] = {
+    response: ta.value,
+    time_ms:  trialStartTime ? Date.now() - trialStartTime : null,
+  };
+}
+
+function nextTrial() {
+  saveCurrentResponse();
+  if (currentIdx < TOTAL - 1) {
+    currentIdx++;
+    renderTrial();
+  } else {
+    document.getElementById("progress-bar").style.width = "100%";
+    showScreen("screen-done");
+  }
+}
+
+function prevTrial() {
+  saveCurrentResponse();
+  if (currentIdx > 0) {
+    currentIdx--;
+    renderTrial();
+  }
+}
+
+// ── Download ───────────────────────────────────────────────────────────────────
+function buildDownloadData() {
+  if (document.getElementById("screen-trial").classList.contains("active")) {
+    saveCurrentResponse();
+  }
+  return {
+    participant_id: participantId,
+    form:           selectedForm,
+    downloaded_at:  new Date().toISOString(),
+    total_trials:   TOTAL,
+    trials: TRIALS.map((t, i) => {
+      const entry = {
+        trial_id:         t.trial_id,
+        trial_type:       t.trial_type,
+        condition:        t.condition,
+        sequence:         t.sequence,
+        prompt:           t.prompt,
+        response:         responses[i].response.trim(),
+        response_time_ms: responses[i].time_ms,
+      };
+      if (t.trial_type === "target") {
+        entry.inclusive_answer    = t.inclusive_answer;
+        entry.exclusive_answer_w1 = t.exclusive_answer_w1;
+        entry.exclusive_answer_w2 = t.exclusive_answer_w2;
+      } else {
+        entry.correct_answer = t.correct_answer;
+      }
+      return entry;
+    }),
+  };
+}
+
+function downloadJSON() {
+  const data  = buildDownloadData();
+  const ts    = new Date().toISOString().slice(0, 19).replace(/:/g, "-");
+  const fname = `xor_pilot_${selectedForm}_${participantId}_${ts}.json`;
+  const blob  = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url   = URL.createObjectURL(blob);
+  const a     = document.createElement("a");
+  a.href = url; a.download = fname; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Keyboard shortcut ──────────────────────────────────────────────────────────
+document.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    if (document.getElementById("screen-trial").classList.contains("active")) {
+      e.preventDefault();
+      nextTrial();
+    }
+  }
+});
+</script>
+</body>
+</html>
